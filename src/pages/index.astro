@@ -1,16 +1,130 @@
 ---
 
+import { dateDiffInYears } from "../helper";
+import MySiteLayout from "../layouts/Layout.astro";
+const pageTitle = "Manish Gowardipe";
+
+// test it
+const yearsOfExp = dateDiffInYears(
+  new Date("2017-06-06"),
+  new Date(Date.now())
+);
+const identity = {
+  firstName: "Manish",
+  country: "Mumbai, India",
+  occupation: "Software Developer",
+  hobbies: ["trekking", "playing cricket", "photography"],
+  approxYearOfExp: yearsOfExp,
+};
+const favBooks = [
+  "Pragmatic Programmer",
+  "The Clean Code",
+  "Zen and the Art of motorcycle maintenence",
+  "Shantaram",
+  "Wise and otherwise",
+  "Tuesday's with morrie",
+];
+const languagesFrameworks = [
+  "Typescript ✧",
+  "Python",
+  "Scala ✧",
+  "Javascript",
+  "Node",
+  "Java ✧",
+  "React ✧",
+  "Astro",
+  "Akka",
+  "Backstage ✧",
+  "CSS",
+  "Vite ✧",
+  "Lit",
+];
+const technicalSkills = [
+  "System Design",
+  "Object Oriented Programming",
+  "Data structures ✧",
+  "TDD",
+  "Web development",
+  "Story estimation & Sprint Planing",
+  "Technical Documentation 🖊️ 📑",
+  "Using Google Search Efficiently 🔍",
+];
+
+const skillColor = "green";
+const factColor = "rgb(92, 89, 79);";
+const titleColor = "rgb(51, 50, 44);";
+const bookColor = "tomato";
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type ="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content = {Astro.generator} >
-    <title>Manish Gowardipe</title>
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
   </head>
+  <style define:vars={{ factColor, skillColor, titleColor, bookColor }}>
+    h1 {
+      color: var(--titleColor);
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    a {
+      /* text-decoration: none; */
+      color: rgb(194, 65, 65);
+      /* background-color: black; */
+    }
+
+    .skill {
+      font-size: 1rem;
+      color: var(--skillColor);
+      font-weight: bold;
+    }
+    .fact {
+      font-size: 1rem;
+      color: var(--factColor);
+      font-weight: bold;
+    }
+    .book {
+      font-size: 1rem;
+      color: var(--bookColor);
+      font-weight: bold;
+    }
+  </style>
   <body>
-    <h1>Manish Gowardipe</h1>
+    <MySiteLayout title="Manish Gowardipe">
+      <p>Few facts about me</p>
+      <ul class="fact">
+        <li>
+          I live in {identity.country} and work as a {identity.occupation} with {
+            identity.approxYearOfExp
+          } years of experience.
+        </li>
+        {
+          identity.hobbies.length >= 3 && (
+            <li>
+              My hobbies are {identity.hobbies[0]}, {identity.hobbies[1]} and{" "}
+              {identity.hobbies[2]}.
+            </li>
+          )
+        }
+      </ul>
+      <p>Technical skills</p>
+      <ul>
+        {technicalSkills.map((skill) => <li class="skill">{skill}</li>)}
+      </ul>
+      <p>Languages and Frameworks:</p>
+      <ul>
+        {languagesFrameworks.map((skill) => <li class="skill">{skill}</li>)}
+      </ul>
+      <details>
+        <summary>My favourite books</summary>
+        <ul>
+          {favBooks.map((book) => <li class="book">{book}</li>)}
+        </ul>
+      </details>
+    </MySiteLayout>
   </body>
 </html>

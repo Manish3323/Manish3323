@@ -1,0 +1,49 @@
+html {
+  background-color: beige;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 80ch;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 1rem 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0 10px;
+  box-shadow: 2px 2px 2px grey;
+  height: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 20px;
+  border-radius: 20px;
+  background-color: #f1f1f1;
+}
+a:link {
+  background-color: tan;
+}
+
+a:visited {
+  background-color: rgb(209, 194, 174);
+}
+
+a:hover {
+  background-color: blanchedalmond;
+}
+
+a:active {
+  background-color: hotpink;
+} 

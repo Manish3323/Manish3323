@@ -1,0 +1,78 @@
+---
+import MySiteLayout from '../layouts/Layout.astro';
+
+
+type Experience = {
+	title: string
+  company: string
+	description: string
+  role: string
+	githubLink?: string
+	private: boolean
+	from: Date
+	to: Date
+}
+
+const experiences: Experience[] = [{
+	title: "Trading platfrom using Spring Framework & Angular 1",
+  company: "NSE Information Technology",
+  role: "Associate System Analyst",
+	description: "",
+	private: true,
+	from: new Date('06/06/2017'), 
+	to: new Date('03/31/2018') 
+},
+{
+	title: "Medical  using Spring Framework & Angular 1",
+  company: "PlexusMd",
+  role: "Javascript developer",
+	description: "",
+	private: true,
+	from: new Date('06/06/2017'), 
+	to: new Date('03/31/2018') 
+},
+{
+	title: "Search optimization based on elastic search.",
+  company: "Thoughworks India private limited",
+  role: "Software Developer - Consultant",
+	description: "",
+	private: true,
+	from: new Date('06/06/2017'), 
+	to: new Date('03/31/2018') 
+},
+{
+	title: "Engineering for Research: Thirty meter telescope",
+  company: "Thoughworks India private limited",
+  role: "Software Developer - Consultant",
+	description: "",
+	private: false,
+  githubLink: "https://github.com/",
+	from: new Date('06/06/2017'), 
+	to: new Date('03/31/2018') 
+},
+{
+	title: "Data mesh implementation using Backstage & Data platform",
+  company: "Thoughworks India private limited",
+  role: "Software Developer - Senior Consultant",
+	description: "",
+	private: true,
+	from: new Date('05/01/2022'), 
+	to: new Date(Date.now()) 
+}
+]
+---
+<MySiteLayout title="Working Experience">
+  <ul>
+    {experiences.map((exp) => (
+      <details>
+        <summary class="exp">{exp.title}</summary>
+        <div>
+        {exp.from.toLocaleDateString()} - {exp.to.toLocaleDateString()}
+        <span class="chip">{exp.private ? "private" : "public"}</span><br>
+        <p>{exp.description}</p>
+        </div>
+      </details>
+    )
+    )}
+  </ul>
+</MySiteLayout>
