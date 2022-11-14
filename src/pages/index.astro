@@ -1,5 +1,4 @@
 ---
-
 import { dateDiffInYears } from "../helper";
 import MySiteLayout from "../layouts/Layout.astro";
 const pageTitle = "Manish Gowardipe";
@@ -17,12 +16,30 @@ const identity = {
   approxYearOfExp: yearsOfExp,
 };
 const favBooks = [
-  "Pragmatic Programmer",
-  "The Clean Code",
-  "Zen and the Art of motorcycle maintenence",
-  "Shantaram",
-  "Wise and otherwise",
-  "Tuesday's with morrie",
+  {
+    title: "Pragmatic Programmer",
+    url: "https://www.goodreads.com/en/book/show/4099.The_Pragmatic_Programmer",
+  },
+  {
+    title: "Clean Code",
+    url: "https://www.goodreads.com/book/show/3735293-clean-code?from_search=true&from_srp=true&qid=GqYPp2NNpY&rank=1",
+  },
+  {
+    title: "Zen and the Art of motorcycle maintenence",
+    url: "https://www.goodreads.com/book/show/629.Zen_and_the_Art_of_Motorcycle_Maintenance?ac=1&from_search=true&qid=TRHl5y2Y5F&rank=1",
+  },
+  {
+    title: "Shantaram",
+    url: "https://www.goodreads.com/book/show/33600.Shantaram?ac=1&from_search=true&qid=TPfO9zYbG6&rank=1",
+  },
+  {
+    title: "Wise and otherwise",
+    url: "https://www.goodreads.com/book/show/1184484.Wise_and_Otherwise?ac=1&from_search=true&qid=y5NZrN5vWg&rank=1",
+  },
+  {
+    title: "Tuesday's with morrie",
+    url: "https://www.goodreads.com/book/show/6900.Tuesdays_with_Morrie?ac=1&from_search=true&qid=QUVH2KgmNq&rank=1",
+  },
 ];
 const languagesFrameworks = [
   "Typescript ✧",
@@ -59,7 +76,7 @@ const bookColor = "tomato";
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/jpeg" href="/giticon.jpeg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
@@ -93,8 +110,9 @@ const bookColor = "tomato";
       font-weight: bold;
     }
   </style>
+  
   <body>
-    <MySiteLayout title="Manish Gowardipe">
+    <MySiteLayout title={pageTitle}>
       <p>Few facts about me</p>
       <ul class="fact">
         <li>
@@ -122,7 +140,13 @@ const bookColor = "tomato";
       <details>
         <summary>My favourite books</summary>
         <ul>
-          {favBooks.map((book) => <li class="book">{book}</li>)}
+          {
+            favBooks.map((book) => (
+              <a href={book.url}>
+                <li class="book">{book.title}</li>
+              </a>
+            ))
+          }
         </ul>
       </details>
     </MySiteLayout>

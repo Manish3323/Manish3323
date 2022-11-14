@@ -1,78 +1,122 @@
 ---
-import MySiteLayout from '../layouts/Layout.astro';
-
+import Card from "../components/Card.astro";
+import MySiteLayout from "../layouts/Layout.astro";
 
 type Experience = {
-	title: string
-  company: string
-	description: string
-  role: string
-	githubLink?: string
-	private: boolean
-	from: Date
-	to: Date
-}
+  title: string;
+  company: string;
+  description: string;
+  role: string;
+  tags: string[];
+	favourite?: boolean;
+  learnings?: string[];
+  href?: string;
+  isPrivate: boolean;
+};
 
-const experiences: Experience[] = [{
-	title: "Trading platfrom using Spring Framework & Angular 1",
-  company: "NSE Information Technology",
-  role: "Associate System Analyst",
-	description: "",
-	private: true,
-	from: new Date('06/06/2017'), 
-	to: new Date('03/31/2018') 
-},
-{
-	title: "Networking platform Doctor's using React native & Loopback",
-  company: "PlexusMd(now Medflix)",
-  role: "Javascript developer",
-	description: "",
-	private: true,
-	from: new Date('06/06/2017'), 
-	to: new Date('03/31/2018') 
-},
-{
-	title: "Search optimization based on elastic search.",
-  company: "Thoughworks India private limited",
-  role: "Software Developer - Consultant",
-	description: "",
-	private: true,
-	from: new Date('06/06/2017'), 
-	to: new Date('03/31/2018') 
-},
-{
-	title: "Engineering for Research: Thirty meter telescope",
-  company: "Thoughworks India private limited",
-  role: "Software Developer - Consultant",
-	description: "",
-	private: false,
-  githubLink: "https://github.com/",
-	from: new Date('06/06/2017'), 
-	to: new Date('03/31/2018') 
-},
-{
-	title: "Data mesh implementation using Backstage & Data platform",
-  company: "Thoughworks India private limited",
-  role: "Software Developer - Senior Consultant",
-	description: "",
-	private: true,
-	from: new Date('05/01/2022'), 
-	to: new Date(Date.now()) 
-}
-]
+const experiences: Experience[] = [
+  {
+    title: "Developer Portal/Data discovery Platform",
+    company: "Thoughtworks India",
+    role: "Software Developer",
+    tags: [
+      "Backstage",
+      "Java",
+      "Data Mesh",
+      "Typescript",
+      "Python",
+      "React",
+      "Azure Kubernetes",
+    ],
+    description: `The ask is to build a developer Portal for the organization implementing Data Mesh principles with the help of Backstage.
+      Portal will enable discovery of data across the organizatoin using Catalog of different data present across domains in the org.
+      `,
+    learnings: [
+      "Involved in discovery/inception of the greenfield project",
+      "Delivering small chunks in terms of prototyping to gain client's trust",
+      "Leading team",
+      "Expectation management is crucial",
+      "Higher velocity leads to degradation of code quality, At times this is acceptable too.",
+    ],
+    isPrivate: true,
+  },
+  {
+    title: "Engineering for Research: Thirty Meter Telescope",
+    company: "Thoughtworks India",
+    role: "Software Developer",
+    favourite: true,
+    description: `This is a multi year project to build fundamental software components for the Thirty Meter wide Radio Telescope.
+      These software components will be used by the scientists to monitor & manage Observations across universe.
+      The Telescope is supposed to see its first light in 2030 from Mauna Kea Observatory in Hawaii. 🤞🏻
+    `,
+    isPrivate: false,
+    tags: [
+      "Typescript",
+      "React",
+      "React-query",
+      "Scala",
+      "Akka",
+      "Concurrency",
+      "Testing Pyramid",
+      "DSL",
+      "Kotlin",
+      "SBT",
+      "Vite",
+    ],
+    learnings: [
+      "Thought process while authoring a Library",
+      "How to package & publish libraries",
+      "Intracacies of Api Design / Interface based programming",
+      "Learnt so many things about built tools",
+      "What it takes to build a VSCode plugin",
+      "Integrating jvm class files at runtime",
+      "Thought process while building Domain Specific Language",
+      "Experienced & Learned what pair programming actually is, there is no way back now",
+      "Presenting demos & prototying",
+      "Experienced the joy of working with strongly typed languages like Scala & Typescript.",
+    ],
+    href: "https://github.com/tmtsoftware/esw",
+  },
+  {
+    title: "Search optimization based on elastic search.",
+    company: "Thoughtworks India",
+    role: "Software Developer",
+    description: "",
+    tags: [],
+    isPrivate: true,
+  },
+  {
+    title: "Healthcare Networking Platform",
+    company: "PlexusMd(now Medflix)",
+    role: "Javascript developer",
+    tags: ["React Native", "Node", "Loopback", "Mysql"],
+    learnings: [
+      "Experienced the Joy / Horrors of startup culture",
+      "Never make long term decisions in rush",
+      "Flat hierarchies are very nice to get things done quickly",
+      "Hiring process in the industry is in very bad shape in india :(",
+      ""
+    ],
+    description: `
+    A Healthcare Network mobile application written in React Native backed by Node.js Loopback framework.
+    Wrote Database related queries and scripts to automated daily routines like backing up and writing logs at regular intervals to get better insight of the product.
+    `,
+    isPrivate: true,
+  },
+];
 ---
-<MySiteLayout title="Working Experience">
+
+<MySiteLayout title="Experience">
   <ul>
-    {experiences.map((exp) => (
-      <details>
-        <summary class="exp">{exp.title}</summary>
-        <div>
-        {exp.from.toLocaleDateString()} - {exp.to.toLocaleDateString()}
-        <span class="chip">{exp.private ? "private" : "public"}</span><br>
-        <p>{exp.description}</p>
-        </div>
-      </details>
-    )
-    )}
+    {
+      experiences.map((exp) => (
+        <details>
+          <summary>
+            {exp.role} : {exp.company}
+          </summary>
+          <Card {...exp} />
+        </details>
+      ))
+    }
   </ul>
 </MySiteLayout>
