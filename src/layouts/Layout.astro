@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Footer from '../components/Footer.astro';
 export interface Props {
 	title: string;
 }
@@ -17,9 +18,19 @@ const {pathname} = Astro.url;
 </head>
 <body>
 	<h1>{title}</h1>
-	<!-- {pathname == "/experience" && <a class="link" href="/">Know about manish</a>} -->
-	{pathname == "/" && <a class="link" href="/experience">Professional experience</a>}
-	<!-- <a class="link" href="/pictures">Picture</a> -->
+	<a class="link" href="/">Know about Manish</a>
+	<a class="link" href="/experience">Professional experience</a>
+	<a class="link" href="/thoughts">Thoughts</a>
+	<hr class="rounded" />
 	<slot />
-	{pathname == "/experience" && <a class="link" href="/">Know about manish</a>}
+	<hr class="rounded" />
+	<Footer />
 </body>
+
+
+<style>
+  hr.rounded {
+    border-top: 2px solid #bbb;
+    border-radius: 2px;
+  }
+</style>

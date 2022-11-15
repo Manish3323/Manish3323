@@ -22,7 +22,8 @@ h1 {
 }
 
 a:link {
-  background-color: tan;
+  background-color: beige;
+  text-decoration: none;
 }
 
 a:visited {
@@ -30,9 +31,5 @@ a:visited {
 }
 
 a:hover {
-  background-color: blanchedalmond;
+  background-color: beige;
 }
-
-a:active {
-  background-color: hotpink;
-} 
