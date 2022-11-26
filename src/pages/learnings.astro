@@ -5,10 +5,10 @@ export interface Props {
 	title: string;
 }
 
-const allPosts = await Astro.glob('../pages/thoughts/*.md');
+const allPosts = await Astro.glob('../pages/learnings/*.md');
 console.log(JSON.stringify(allPosts[0]))
 ---
-<MySiteLayout title="Thoughts">
+<MySiteLayout title="Learnings">
   <ul>
     {allPosts.map(thought => 
       (<li><a href={thought.url}> {new Date(thought.frontmatter.pubDate).toLocaleDateString()} - {thought.frontmatter.title} </a></li>)
