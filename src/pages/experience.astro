@@ -8,7 +8,7 @@ type Experience = {
   description: string;
   role: string;
   tags: string[];
-	favourite?: boolean;
+  favourite?: boolean;
   learnings?: string[];
   href?: string;
   isPrivate: boolean;
@@ -74,7 +74,7 @@ const experiences: Experience[] = [
       "Experienced & Learned what pair programming actually is, there is no way back now",
       "Presenting demos & prototying",
       "Experienced the joy of working with strongly typed languages like Scala & Typescript.",
-      "Debugging"
+      "Debugging",
     ],
     href: "https://github.com/tmtsoftware/esw",
   },
@@ -99,8 +99,23 @@ const experiences: Experience[] = [
     title: "Search optimization based on elastic search.",
     company: "Thoughtworks India",
     role: "Software Developer",
-    description: "",
-    tags: [],
+    learnings: [
+      "How does search engines mechanism work",
+      "what is reverse indexing, how does tokenizing the search document help in returning results",
+      "How to evolve API which are already in production & being consumed by other services"
+    ],
+    description: `
+      Enchancing the user experience for a multi tenant retail client by providing relevent search results 
+      using different relevency parameters in the search index of the products.`,
+    tags: [
+      "Elastic search",
+      "retail",
+      "indexing",
+      "Point of sale",
+      "Java",
+      "Postgres",
+      "Rest API designing",
+    ],
     isPrivate: true,
   },
   {
@@ -112,7 +127,7 @@ const experiences: Experience[] = [
       "Experienced the Joy / Horrors of startup culture",
       "Never make long term decisions in rush",
       "Flat hierarchies are very nice to get things done quickly",
-      "Hiring process in the industry is in very bad shape in india :("
+      "Hiring process in the industry is in very bad shape in india :(",
     ],
     description: `
     A Healthcare Network mobile application written in React Native backed by Node.js Loopback framework.
@@ -120,7 +135,6 @@ const experiences: Experience[] = [
     `,
     isPrivate: true,
   },
-  
 ];
 ---
 
