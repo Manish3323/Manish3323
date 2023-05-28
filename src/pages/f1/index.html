@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<style>
+  h3 {
+    height: 20px;
+  }
+
+  body {
+    height: 1000px;
+    width: 1000px;
+    background-color: #f5f5dc;
+  }
+
+  .track {
+    fill: none;
+    stroke: #c9abab;
+    stroke-width: 4px;
+  }
+
+  .marker {
+    stroke: #fff;
+  }
+
+  .marker-text {
+    font-size: 15px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    color: black;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.5rem;
+  }
+
+  #content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    column-gap: 100px;
+  }
+
+  #trackDiv {
+    width: 100%;
+    height: 100%;
+  }
+
+  #table {
+    border: 1px solid sandybrown;
+    max-height: 150px;
+  }
+
+  #table,
+  tr,
+  th,
+  td {
+    border: 1px solid sandybrown;
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+</style>
+
+<body>
+  <form class="form" action="#" onsubmit="setValues();return false">
+    <div>
+      <label for="season"> Season</label>
+      <input disabled id="season" type="number" min="1900" max="2023" step="1" value="2023" />
+    </div>
+    <div>
+      <label for="round"> Round</label>
+      <input type="number" id="round" min="1" step="1" value="1" />
+    </div>
+    <div>
+      <label for="lap"> Lap</label>
+      <select id="lap" onchange="onroundchange(this)">
+      </select>
+    </div>
+    <button type="submit"> Update </button>
+  </form>
+  <h3 id="circuit"></h3>
+  <div id="content">
+    <table id="table">
+      <tr>
+        <th>Driver</th>
+        <th>Lap time</th>
+      </tr>
+    </table>
+    <div id="trackDiv"> </div>
+  </div>
+  <script>
+    const map = {
+      "bahrain": "bh-2002",
+      "albert_park": "au-1953",
+      "americas": "us-2012",
+      "baku": "az-2016",
+      "catalunya": "es-1991",
+      "hungaroring": "hu-1986",
+      "interlagos": undefined,
+      "jeddah": "sa-2021",
+      "losail": "qa-2004",
+      "marina_bay": "sg-2008",
+      "miami": "us-2022",
+      "monaco": "mc-1929",
+      "monza": "it-1922",
+      "red_bull_ring": "at-1969",
+      "rodriguez": "mx-1962",
+      "silverstone": "gb-1948",
+      "spa": "be-1925",
+      "suzuka": "jp-1962",
+      "vegas": "us-2023",
+      "villeneuve": "ca-1978",
+      "yas_marina": "ae-2009",
+      "zandvoort": "nl-1948",
+    }
+    let driversJson = {}
+    fetch('/drivers.json').then(async (response) => driversJson = await response.json())
+    const laps = document.getElementById('lap')
+    var lapvalue = 1
+    const projection = d3.geoMercator();
+    const getPath = d3.geoPath()
+      .projection(projection)
+    function onroundchange(e) {
+      lapvalue = e.value
+    }
+    var path = "";
+    async function updateTrack(season, round) {
+      const response = await d3.json(`http://ergast.com/api/f1/${season}/results.json?limit=1000`)
+
+      document.getElementById("round").max = response.MRData.RaceTable.Races.length
+      document.getElementById("circuit").innerText = response.MRData.RaceTable.Races[round - 1].Circuit.circuitName
+        + ", " + response.MRData.RaceTable.Races[round - 1].Circuit.Location.country
+      const circuitId = response.MRData.RaceTable.Races[round - 1].Circuit.circuitId
+      const lapsDropdown = document.getElementById("lap")
+      const laps = parseInt(response.MRData.RaceTable.Races[round - 1].Results[0].laps)
+      let newArray = Array.from({ length: laps }, (value, index) => index + 1);
+      lapsDropdown.length = 0;
+      for (let key in newArray) {
+        let option = document.createElement("option");
+        option.setAttribute('value', newArray[key]);
+        let optionText = document.createTextNode(newArray[key]);
+        option.appendChild(optionText);
+        lapsDropdown.appendChild(option);
+      }
+      return circuitId
+    }
+    function clearMarkers(svg) {
+      svg.selectAll('.marker').remove()
+    }
+    function updateTable(laptimes) {
+      var elmtTable = document.getElementById('table');
+      var tableRows = elmtTable.getElementsByTagName('tr');
+      var rowCount = tableRows.length;
+
+      for (var x = rowCount - 1; x > 0; x--) {
+        elmtTable.removeChild(tableRows[x]);
+      }
+      laptimes.forEach((driver, index) => {
+        const tr = document.createElement('tr')
+        const td1 = document.createElement('td')
+        const td2 = document.createElement('td')
+        td1.textContent = driver.driverId
+        td2.textContent = driver.time
+        tr.appendChild(td1)
+        tr.appendChild(td2)
+
+        tr.style.backgroundColor = colors[index]
+        elmtTable.appendChild(tr)
+      })
+    }
+    function createTrack(season, round, lap, circuitId) {
+      // Step 1: Read GeoJSON file to create an SVG-based track
+      d3.json(`https://raw.githubusercontent.com/bacinger/f1-circuits/master/circuits/${map[circuitId]}.geojson`).then(function (geojson) {
+        const width = 1000
+        const height = 1000
+
+        projection.fitHeight(height / 2, geojson);
+        projection.fitWidth(width / 2, geojson);
+
+        const svgToDelete = d3.select("svg")
+        if (svgToDelete) { svgToDelete.remove(); }
+        svg = d3.select("#trackDiv").append("svg");
+        path = svg.append("path")
+          .attr("d", getPath(geojson))
+          .attr("class", "track");
+
+        d3.json(`http://ergast.com/api/f1/${season}/${round}/laps/${lapvalue}.json`)
+          .then(function (response) {
+            const lapTimes = response.MRData.RaceTable.Races[0].Laps[0].Timings;
+            updateTable(lapTimes)
+            // Step 5: Run the visualization for all 20 drivers
+            const drivers = lapTimes.map(function (d) {
+              return { driver: d.driverId, time: timeToMilliseconds(d.time) / 3 };
+            });
+            clearMarkers(svg)
+            drivers.forEach(function (driver, index) {
+              transitionDriverMarker(driver.driver, driver.time, colors[index]);
+            });
+          });
+      });
+    }
+    // https://ergast.com/api/f1/drivers/<driverid>/constructors.json
+    async function setValues() {
+      const season = document.getElementById('season').value
+      const round = document.getElementById('round').value
+      const lapvalue = laps.options[laps.selectedIndex]?.value || 1;
+      const circuitId = await updateTrack(season, round)
+      createTrack(season, round, lapvalue, circuitId)
+    }
+    function timeToMilliseconds(time) {
+      console.log(time)
+      var parts = time.split(":");
+      var minutes = parseInt(parts[0]);
+      var seconds = parts[1];
+      var [sec, millis] = seconds.split('.');
+      var milliseconds = parseInt(millis);
+
+      var totalMilliseconds = (minutes * 60 * 1000) + (parseInt(sec) * 1000) + milliseconds;
+
+      return totalMilliseconds;
+    }
+
+    function translateAlong(path) {
+      var l = path.getTotalLength();
+      return function (d, i, a) {
+        return function (t) {
+          var p = path.getPointAtLength(t * l);
+          return "translate(" + p.x + "," + p.y + ")";
+        };
+      };
+    }
+
+    function transitionDriverMarker(driverId, time, fillColor) {
+      const driverObject = driversJson.Drivers.filter(driver => driver.driverId === driverId)[0]
+      console.log(driverObject)
+      var markerGroup = svg.append("g")
+        .attr("class", "marker");
+
+      var pathLength = path.node().getTotalLength();
+
+      markerGroup.append("image")
+        .attr("xlink:href", `/logos/${driverObject.constructorId}`) // Replace with your image URL
+        .attr("width", 30)
+        .attr("height", 30)
+        .attr("x", -0)
+        .attr("y", -0);
+      markerGroup.append("text")
+        .attr("stroke", fillColor)
+        .attr("stroke-width", 1)
+        .text(driverObject.givenName) // Replace with your desired text
+        .attr("class", "marker-text");
+      markerGroup.transition()
+        .duration(time) // Transition duration in milliseconds
+        .attrTween("transform", translateAlong(path.node()))
+        .on("end", function () {
+          // Transition completed
+        });
+
+      // Code to transition the driver's marker based on lap times
+      // ...
+    }
+    const colors = [
+      "#e6194b",
+      "#3cb44b",
+      "#ffe119",
+      "#4363d8",
+      "#f58231",
+      "#911eb4",
+      "#46f0f0",
+      "#f032e6",
+      "#bcf60c",
+      "#fabebe",
+      "#008080",
+      "#e6beff",
+      "#9a6324",
+      "#fffac8",
+      "#b65656",
+      "#aaffc3",
+      "#808000", //rgb(208 94 94)
+      "#ffd8b1",
+      "#6f6fcc",
+      "#808080",
+      "#ffffff",
+      "#000000",
+    ];
+    window.addEventListener('load', () => {
+
+      setValues()
+    })
+  </script>
+</body>
+
+</html>
