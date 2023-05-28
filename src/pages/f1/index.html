@@ -138,7 +138,7 @@
     }
     var path = "";
     async function updateTrack(season, round) {
-      const response = await d3.json(`http://ergast.com/api/f1/${season}/results.json?limit=1000`)
+      const response = await d3.json(`https://ergast.com/api/f1/${season}/results.json?limit=1000`)
 
       document.getElementById("round").max = response.MRData.RaceTable.Races.length
       document.getElementById("circuit").innerText = response.MRData.RaceTable.Races[round - 1].Circuit.circuitName
@@ -197,7 +197,7 @@
           .attr("d", getPath(geojson))
           .attr("class", "track");
 
-        d3.json(`http://ergast.com/api/f1/${season}/${round}/laps/${lapvalue}.json`)
+        d3.json(`https://ergast.com/api/f1/${season}/${round}/laps/${lapvalue}.json`)
           .then(function (response) {
             const lapTimes = response.MRData.RaceTable.Races[0].Laps[0].Timings;
             updateTable(lapTimes)
