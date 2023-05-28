@@ -11,7 +11,7 @@
   }
 
   body {
-    height: 1000px;
+    height: 2000px;
     width: 1000px;
     background-color: #f5f5dc;
   }
@@ -184,11 +184,11 @@
     function createTrack(season, round, lap, circuitId) {
       // Step 1: Read GeoJSON file to create an SVG-based track
       d3.json(`https://raw.githubusercontent.com/bacinger/f1-circuits/master/circuits/${map[circuitId]}.geojson`).then(function (geojson) {
-        const width = 1000
-        const height = 1000
-
-        projection.fitHeight(height / 2, geojson);
-        projection.fitWidth(width / 2, geojson);
+        // const width = 1000
+        // const height = 1500
+        // const proportionalityFactor = 2
+        projection.fitHeight(1500, geojson);
+        projection.fitWidth(400, geojson);
 
         const svgToDelete = d3.select("svg")
         if (svgToDelete) { svgToDelete.remove(); }
