@@ -78,7 +78,7 @@
   <form class="form" action="#" onsubmit="setValues();return false">
     <div>
       <label for="season"> Season</label>
-      <input disabled id="season" type="number" min="1900" max="2023" step="1" value="2023" />
+      <input id="season" type="number" min="2021" max="2026" step="1" value="2023" />
     </div>
     <div>
       <label for="round"> Round</label>
@@ -138,7 +138,7 @@
     }
     var path = "";
     async function updateTrack(season, round) {
-      const response = await d3.json(`https://ergast.com/api/f1/${season}/results.json?limit=1000`)
+      const response = await d3.json(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=1000`)
 
       document.getElementById("round").max = response.MRData.RaceTable.Races.length
       document.getElementById("circuit").innerText = response.MRData.RaceTable.Races[round - 1].Circuit.circuitName
@@ -197,22 +197,29 @@
           .attr("d", getPath(geojson))
           .attr("class", "track");
 
-        d3.json(`https://ergast.com/api/f1/${season}/${round}/laps/${lapvalue}.json`)
+        d3.json(`https://api.jolpi.ca/ergast/f1/${season}/${round}/laps/${lapvalue}.json`)
           .then(function (response) {
             const lapTimes = response.MRData.RaceTable.Races[0].Laps[0].Timings;
             updateTable(lapTimes)
-            // Step 5: Run the visualization for all 20 drivers
+            const rawTimes = lapTimes.map(d => timeToMilliseconds(d.time));
+            const leaderTime = Math.min(...rawTimes);
             const drivers = lapTimes.map(function (d) {
-              return { driver: d.driverId, time: timeToMilliseconds(d.time) / 3 };
+              const rawTime = timeToMilliseconds(d.time);
+              const gap = rawTime - leaderTime;
+              return {
+                driver: d.driverId,
+                time: rawTime / 3,
+                startOffset: gap === 0 ? 0 : 1 - gap / leaderTime
+              };
             });
             clearMarkers(svg)
             drivers.forEach(function (driver, index) {
-              transitionDriverMarker(driver.driver, driver.time, colors[index]);
+              transitionDriverMarker(driver.driver, driver.time, colors[index], driver.startOffset);
             });
           });
       });
     }
-    // https://ergast.com/api/f1/drivers/<driverid>/constructors.json
+    // https://api.jolpi.ca/ergast/f1/drivers/<driverid>/constructors.json
     async function setValues() {
       const season = document.getElementById('season').value
       const round = document.getElementById('round').value
@@ -233,44 +240,49 @@
       return totalMilliseconds;
     }
 
-    function translateAlong(path) {
+    function translateAlong(path, from, to) {
       var l = path.getTotalLength();
       return function (d, i, a) {
         return function (t) {
-          var p = path.getPointAtLength(t * l);
+          var p = path.getPointAtLength((from + t * (to - from)) * l);
           return "translate(" + p.x + "," + p.y + ")";
         };
       };
     }
 
-    function transitionDriverMarker(driverId, time, fillColor) {
+    function transitionDriverMarker(driverId, time, fillColor, startOffset) {
       const driverObject = driversJson.Drivers.filter(driver => driver.driverId === driverId)[0]
-      console.log(driverObject)
-      var markerGroup = svg.append("g")
-        .attr("class", "marker");
-
-      var pathLength = path.node().getTotalLength();
+      var markerGroup = svg.append("g").attr("class", "marker");
 
       markerGroup.append("image")
-        .attr("xlink:href", `/logos/${driverObject.constructorId}`) // Replace with your image URL
+        .attr("xlink:href", `/logos/${driverObject.constructorId}`)
         .attr("width", 30)
         .attr("height", 30)
-        .attr("x", -0)
-        .attr("y", -0);
+        .attr("x", -15)
+        .attr("y", -15);
       markerGroup.append("text")
         .attr("stroke", fillColor)
         .attr("stroke-width", 1)
-        .text(driverObject.givenName) // Replace with your desired text
+        .text(driverObject.givenName)
         .attr("class", "marker-text");
-      markerGroup.transition()
-        .duration(time) // Transition duration in milliseconds
-        .attrTween("transform", translateAlong(path.node()))
-        .on("end", function () {
-          // Transition completed
-        });
 
-      // Code to transition the driver's marker based on lap times
-      // ...
+      function loop() {
+        markerGroup.transition()
+          .duration(time)
+          .ease(d3.easeLinear)
+          .attrTween("transform", translateAlong(path.node(), 0, 1))
+          .on("end", loop);
+      }
+
+      if (startOffset > 0) {
+        markerGroup.transition()
+          .duration(time * (1 - startOffset))
+          .ease(d3.easeLinear)
+          .attrTween("transform", translateAlong(path.node(), startOffset, 1))
+          .on("end", loop);
+      } else {
+        loop();
+      }
     }
     const colors = [
       "#e6194b",
