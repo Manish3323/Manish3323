@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/jpeg" href="/giticon.jpeg">
+  <title>Spirals from log & exp — Manish</title>
+  <style>
+    html {
+      background-color: #f5f5dc;
+      font-family: 'Courier New', Courier, monospace;
+      color: #33322c;
+    }
+
+    body {
+      margin: 0 auto;
+      width: 100%;
+      max-width: 760px;
+      padding: 1rem;
+      line-height: 1.6;
+    }
+
+    * { box-sizing: border-box; }
+
+    a { color: rgb(194, 65, 65); }
+
+    h1 { font-size: 2rem; margin: 1rem 0 0.25rem; }
+
+    .lede { color: #5c594f; }
+
+    hr.rounded {
+      border: none;
+      border-top: 2px solid #bbb;
+      border-radius: 2px;
+      margin: 2rem 0;
+    }
+
+    figure {
+      margin: 1.5rem 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      background: #0f0026;
+      border-radius: 6px;
+      image-rendering: auto;
+    }
+
+    canvas.square { aspect-ratio: 1 / 1; max-width: 420px; margin: 0 auto; }
+    canvas.strip  { aspect-ratio: 5 / 2; }
+
+    figcaption {
+      margin-top: 0.6rem;
+      font-size: 0.95rem;
+      color: #5c594f;
+    }
+
+    figcaption b { color: #33322c; }
+
+    .step-num {
+      display: inline-block;
+      background: #33322c;
+      color: #f5f5dc;
+      border-radius: 50%;
+      width: 1.6em;
+      height: 1.6em;
+      line-height: 1.6em;
+      text-align: center;
+      margin-right: 0.4em;
+      font-weight: bold;
+    }
+
+    code, .mono { font-family: 'Courier New', Courier, monospace; }
+
+    .fn { color: rgb(194, 65, 65); font-weight: bold; }
+
+    /* controls */
+    .controls {
+      margin: 1rem auto 0;
+      max-width: 420px;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .ctrl {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ctrl label { font-size: 0.9rem; }
+    .ctrl .val { color: #5c594f; font-size: 0.85rem; min-width: 3.5em; text-align: right; }
+
+    input[type="range"] { width: 100%; accent-color: rgb(194, 65, 65); }
+
+    .buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    button, .filebtn {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      border: 2px solid #33322c;
+      background: #f5f5dc;
+      color: #33322c;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover, .filebtn:hover { background: beige; }
+    .filebtn { display: inline-block; }
+    .filebtn input { display: none; }
+
+    .toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+
+    .backlink { font-size: 0.9rem; }
+
+    .note { font-size: 0.85rem; color: #7a7768; }
+  </style>
+</head>
+
+<body>
+  <a class="backlink" href="/">&larr; back to Manish</a>
+  <h1>A picture, wound into a spiral</h1>
+  <p class="lede">
+    Inspired by 3Blue1Brown's video on the quiet geometry shared by design and math.
+    Put a picture on the complex plane and two functions &mdash; the complex logarithm
+    <span class="fn">log(z)</span> and its inverse <span class="fn">exp(z)</span> &mdash; turn
+    ordinary shifts and rotations into spirals that converge to a point. Here is the whole
+    trick, one step at a time.
+  </p>
+
+  <hr class="rounded">
+
+  <figure>
+    <canvas class="square" data-stage="0"></canvas>
+    <figcaption>
+      <span class="step-num">1</span><b>The picture, on the complex plane.</b>
+      Every pixel has a radius <i>r</i> (distance from the centre) and an angle
+      <i>&theta;</i>. The overlaid rings and spokes track those two numbers &mdash; watch
+      where they go next.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <canvas class="strip" data-stage="1"></canvas>
+    <figcaption>
+      <span class="step-num">2</span><b>Apply <span class="fn">log(z)</span>.</b>
+      The complex log sends <span class="mono">(r,&nbsp;&theta;)</span> to
+      <span class="mono">(ln&nbsp;r,&nbsp;&theta;)</span>: radius becomes a horizontal
+      position, angle becomes height. The round picture is unrolled into a flat strip &mdash;
+      rings become vertical lines, spokes become horizontal ones.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <canvas class="strip" data-stage="2"></canvas>
+    <figcaption>
+      <span class="step-num">3</span><b>Rotate the strip.</b>
+      Tilt it by a small angle. That is the entire secret: a rotation <i>here</i>, in
+      log-space, is what will braid each loop of the picture into the next one.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <canvas class="square" data-stage="3"></canvas>
+    <div class="controls">
+      <div class="ctrl">
+        <label for="angle">Twist &nbsp;<span class="note">(tilt of the strip)</span></label>
+        <span class="val" id="angleVal"></span>
+        <input type="range" id="angle" min="-1.2" max="1.2" step="0.001" value="0.0" style="grid-column: 1 / -1;">
+      </div>
+      <div class="ctrl">
+        <label for="period">Convergence</label>
+        <span class="val" id="periodVal"></span>
+        <input type="range" id="period" min="0.4" max="2.5" step="0.01" value="1" style="grid-column: 1 / -1;">
+      </div>
+      <div class="ctrl">
+        <label for="zoom">Zoom</label>
+        <span class="val" id="zoomVal"></span>
+        <input type="range" id="zoom" min="0.4" max="3" step="0.01" value="1" style="grid-column: 1 / -1;">
+      </div>
+      <label class="toggle"><input type="checkbox" id="tile"> Recurse endlessly (tile the strip)</label>
+      <div class="buttons">
+        <label class="filebtn">Upload a photo<input type="file" id="upload" accept="image/*"></label>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+    <figcaption>
+      <span class="step-num">4</span><b>Apply <span class="fn">exp(z)</span>.</b>
+      Exponentiation is the inverse of the log &mdash; it rolls the strip back up. With
+      <b>zero twist</b> it lands back on the original picture exactly (that is
+      <span class="mono">exp(log&nbsp;z)&nbsp;=&nbsp;z</span>). Add the twist and every ring
+      shears into the next: a <b>logarithmic spiral</b> converging to the centre. Tick
+      <i>recurse</i> to tile the strip and fall inward forever. Drag the sliders, or drop in
+      your own photo.
+    </figcaption>
+  </figure>
+
+  <hr class="rounded">
+
+  <p class="note">
+    All four panels run the same idea in a WebGL fragment shader: for each output pixel it
+    walks the map backwards &mdash; <span class="mono">plane &rarr; log &rarr; un-twist &rarr;
+    strip</span> &mdash; and reads the source colour there. The spiral you see is the shape of
+    <span class="mono">z &rarr; exp( m &middot; log&nbsp;z )</span> for a complex number
+    <span class="mono">m</span>; the twist slider is the argument of <span class="mono">m</span>,
+    convergence is its magnitude. When <span class="mono">m</span> is tuned so the strip tiles
+    seamlessly, this is exactly the classic Droste effect.
+  </p>
+
+  <p class="backlink"><a href="/f1">&rarr; see the F1 visualization</a></p>
+
+  <script>
+    const VERT = `
+      attribute vec2 aPos;
+      varying vec2 vUv;
+      void main() {
+        vUv = aPos * 0.5 + 0.5;
+        gl_Position = vec4(aPos, 0.0, 1.0);
+      }`;
+
+    const FRAG = `
+      precision highp float;
+      varying vec2 vUv;
+      uniform sampler2D uTex;
+      uniform float uAspect;    // canvas width / height
+      uniform float uImgAspect; // image width / height
+      uniform float uStage;     // 0,1,2,3
+      uniform float uAngle;     // radians
+      uniform float uPeriod;    // convergence / radial period
+      uniform float uZoom;
+      uniform float uTile;      // 0/1
+      uniform float uGrid;      // 0/1 polar overlay
+      uniform vec3  uBg;
+      const float PI = 3.14159265359;
+
+      vec2 cexp(vec2 z){ float e = exp(z.x); return vec2(e*cos(z.y), e*sin(z.y)); }
+      vec2 clog(vec2 z){ return vec2(log(length(z) + 1e-9), atan(z.y, z.x)); }
+      vec2 rot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(c*v.x - s*v.y, s*v.x + c*v.y); }
+
+      // sample the source, fit into the [-1,1]^2 square preserving aspect; background outside
+      vec4 sampleFit(vec2 z0){
+        vec2 p = z0;
+        if (uImgAspect >= 1.0) p.y *= uImgAspect; else p.x /= uImgAspect;
+        vec2 uv = p * 0.5 + 0.5;
+        if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec4(uBg, 1.0);
+        return texture2D(uTex, vec2(uv.x, 1.0 - uv.y));
+      }
+      vec4 sampleTile(vec2 uv){
+        return texture2D(uTex, vec2(fract(uv.x), 1.0 - fract(uv.y)));
+      }
+
+      void main(){
+        vec2 c = vUv * 2.0 - 1.0;
+        c.x *= uAspect;
+        c /= uZoom;
+        vec4 col;
+
+        if (uStage < 0.5) {
+          // 1 - original
+          col = sampleFit(c);
+          if (uGrid > 0.5) {
+            float r = length(c);
+            float ang = atan(c.y, c.x);
+            float ring  = 1.0 - smoothstep(0.0, 0.012, abs(fract(r / 0.25 + 0.5) - 0.5) * 0.25);
+            float spoke = 1.0 - smoothstep(0.0, 0.03,  abs(fract(ang / (PI / 6.0) + 0.5) - 0.5));
+            spoke *= smoothstep(0.02, 0.06, r);
+            col.rgb = mix(col.rgb, vec3(1.0), max(ring, spoke) * 0.4);
+          }
+        } else if (uStage < 1.5) {
+          // 2 - log strip: x -> ln r, y -> angle
+          float lnr = c.x * 1.2 - 0.7;
+          float ang = c.y * PI;
+          col = sampleFit(cexp(vec2(lnr, ang)));
+        } else if (uStage < 2.5) {
+          // 3 - rotate the strip
+          vec2 st = vec2(c.x * 1.2 - 0.7, c.y * PI);
+          st = rot(st, uAngle);
+          col = sampleFit(cexp(st));
+        } else {
+          // 4 - exp back to the plane
+          vec2 w = clog(c);        // (ln r, angle)
+          w = rot(w, -uAngle);     // undo the twist
+          if (uTile > 0.5) {
+            float u = w.y / (2.0 * PI) + 0.5;
+            float v = w.x / (uPeriod * 0.5);
+            col = sampleTile(vec2(u, v));
+          } else {
+            col = sampleFit(cexp(w / uPeriod));
+          }
+        }
+        gl_FragColor = col;
+      }`;
+
+    const BG = [0.059, 0.0, 0.149]; // #0f0026
+
+    function makeRenderer(canvas, stage) {
+      const gl = canvas.getContext('webgl', { antialias: true, preserveDrawingBuffer: false });
+      if (!gl) { canvas.replaceWith(Object.assign(document.createElement('p'),
+        { textContent: 'WebGL is not available in this browser.' })); return null; }
+
+      function compile(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src); gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s);
+        return s;
+      }
+      const prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'aPos');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+      const tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array([25, 0, 40, 255]));
+
+      const U = {};
+      ['uTex','uAspect','uImgAspect','uStage','uAngle','uPeriod','uZoom','uTile','uGrid','uBg']
+        .forEach(n => U[n] = gl.getUniformLocation(prog, n));
+
+      let imgAspect = 1;
+
+      function setImage(source, aspect) {
+        imgAspect = aspect;
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      }
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
+        const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+      }
+
+      function render(p) {
+        resize();
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.useProgram(prog);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(U.uTex, 0);
+        gl.uniform1f(U.uAspect, canvas.width / canvas.height);
+        gl.uniform1f(U.uImgAspect, imgAspect);
+        gl.uniform1f(U.uStage, stage);
+        gl.uniform1f(U.uAngle, p.angle);
+        gl.uniform1f(U.uPeriod, p.period);
+        gl.uniform1f(U.uZoom, stage === 3 ? p.zoom : 1.0);
+        gl.uniform1f(U.uTile, p.tile ? 1 : 0);
+        gl.uniform1f(U.uGrid, stage === 0 ? 1 : 0);
+        gl.uniform3f(U.uBg, BG[0], BG[1], BG[2]);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      return { render, setImage, stage };
+    }
+
+    // ---- wire everything together ----
+    const canvases = [...document.querySelectorAll('canvas[data-stage]')];
+    const renderers = canvases.map(c => makeRenderer(c, +c.dataset.stage)).filter(Boolean);
+
+    const angleEl = document.getElementById('angle');
+    const periodEl = document.getElementById('period');
+    const zoomEl = document.getElementById('zoom');
+    const tileEl = document.getElementById('tile');
+    const angleVal = document.getElementById('angleVal');
+    const periodVal = document.getElementById('periodVal');
+    const zoomVal = document.getElementById('zoomVal');
+
+    // stages 2 & 3 share the same illustrative twist by default
+    const FIXED_STAGE2_ANGLE = 0.4;
+
+    function params() {
+      return {
+        angle: +angleEl.value,
+        period: +periodEl.value,
+        zoom: +zoomEl.value,
+        tile: tileEl.checked,
+      };
+    }
+
+    function renderAll() {
+      const p = params();
+      angleVal.textContent = (p.angle).toFixed(2) + ' rad';
+      periodVal.textContent = (p.period).toFixed(2);
+      zoomVal.textContent = (p.zoom).toFixed(2) + '×';
+      // render each with its own stage-appropriate params
+      renderers.forEach((r) => {
+        const pr = { ...p };
+        if (r.stage === 2) pr.angle = FIXED_STAGE2_ANGLE; // fixed didactic tilt
+        r.render(pr);
+      });
+    }
+
+    [angleEl, periodEl, zoomEl].forEach(el => el.addEventListener('input', renderAll));
+    tileEl.addEventListener('change', renderAll);
+    window.addEventListener('resize', renderAll);
+
+    document.getElementById('reset').addEventListener('click', () => {
+      angleEl.value = 0.0; periodEl.value = 1; zoomEl.value = 1; tileEl.checked = false;
+      renderAll();
+    });
+
+    document.getElementById('upload').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        const max = 1024;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(img.width * scale));
+        cv.height = Math.max(1, Math.round(img.height * scale));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        const aspect = cv.width / cv.height;
+        renderers.forEach(r => r.setImage(cv, aspect));
+        URL.revokeObjectURL(img.src);
+        renderAll();
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    // load the bundled sample, then render
+    const sample = new Image();
+    sample.crossOrigin = 'anonymous';
+    sample.onload = () => {
+      // rasterize the SVG to a fixed-size canvas for a reliable texture source
+      const cv = document.createElement('canvas');
+      cv.width = 512; cv.height = 512;
+      cv.getContext('2d').drawImage(sample, 0, 0, 512, 512);
+      renderers.forEach(r => r.setImage(cv, 1));
+      renderAll();
+    };
+    sample.onerror = renderAll;
+    sample.src = '/images/spiral-sample.svg';
+
+    renderAll();
+  </script>
+</body>
+
+</html>
